@@ -1,5 +1,7 @@
 "use strict";
 const Dynamo = require("./lib/Dynamo");
+const AWS = require("aws-sdk");
+const dynamoDb = new AWS.DynamoDB.DocumentClient();
 
 const { tableName } = process.env;
 
@@ -58,3 +60,42 @@ module.exports.addUser = async (event) => {
     }),
   };
 };
+
+module.exports.deleteUser = async (event) => {
+  const { pathParameters } = event;
+  const { id } = pathParameters;
+  const deleteResponse = await Dynamo.delete(id, tableName).catch(err =>  null);
+
+  if(!deleteResponse) {
+    return {
+      statusCode: 400,
+      body: JSON.stringify({ success: false })
+    }
+  }
+
+  return {
+    statusCode: 200,
+    body: JSON.stringify({
+      success: true
+    }),
+  };
+};
+// module.exports.updateUser = async (event) => {
+//   const { pathParameters } = event;
+//   const { id } = pathParameters;
+//   const updateResponse = await Dynamo.update(id, tableName).catch(err =>  null);
+
+//   if(!updateResponse) {
+//     return {
+//       statusCode: 400,
+//       body: JSON.stringify({ success: false })
+//     }
+//   }
+
+//   return {
+//     statusCode: 200,
+//     body: JSON.stringify({
+//       success: true
+//     }),
+//   };
+// };

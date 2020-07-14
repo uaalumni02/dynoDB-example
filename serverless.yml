@@ -83,6 +83,20 @@ functions:
           path: add/users/{id}
           method: post
 
+  delete_user:
+    handler: handler.deleteUser
+    events:
+      - http:
+          path: delete/user/{id}
+          method: delete
+
+  # update_user:
+  #   handler: handler.updateUser
+  #   events:
+  #     - http:
+  #         path: update/user/{id}
+  #         method: patch
+
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events
 #    Check the event documentation for details

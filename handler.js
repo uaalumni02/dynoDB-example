@@ -1,7 +1,5 @@
 "use strict";
 const Dynamo = require("./lib/Dynamo");
-const AWS = require("aws-sdk");
-const dynamoDb = new AWS.DynamoDB.DocumentClient();
 
 const { tableName } = process.env;
 
@@ -64,38 +62,58 @@ module.exports.addUser = async (event) => {
 module.exports.deleteUser = async (event) => {
   const { pathParameters } = event;
   const { id } = pathParameters;
-  const deleteResponse = await Dynamo.delete(id, tableName).catch(err =>  null);
+  const deleteResponse = await Dynamo.delete(id, tableName).catch(
+    (err) => null
+  );
 
-  if(!deleteResponse) {
+  if (!deleteResponse) {
     return {
       statusCode: 400,
-      body: JSON.stringify({ success: false })
-    }
+      body: JSON.stringify({ success: false }),
+    };
   }
 
   return {
     statusCode: 200,
     body: JSON.stringify({
-      success: true
+      success: true,
     }),
   };
 };
-// module.exports.updateUser = async (event) => {
-//   const { pathParameters } = event;
-//   const { id } = pathParameters;
-//   const updateResponse = await Dynamo.update(id, tableName).catch(err =>  null);
 
-//   if(!updateResponse) {
-//     return {
-//       statusCode: 400,
-//       body: JSON.stringify({ success: false })
-//     }
-//   }
 
-//   return {
-//     statusCode: 200,
-//     body: JSON.stringify({
-//       success: true
-//     }),
-//   };
-// };
+var AWS = require("aws-sdk");
+
+const documentClient = new AWS.DynamoDB.DocumentClient();
+
+var table = "users";
+
+var ID = '2';
+
+module.exports.updateUser = async (event) => {
+  console.log(event)
+  var params = {
+    TableName: table,
+    Key: {
+      ID
+    },
+    UpdateExpression: "set email = :e, firstName=:f",
+    ExpressionAttributeValues: {
+      ":e": "dbell@yahoo.com",
+      ":f": "meco",
+    },
+    ReturnValues: "ALL_NEW",
+  };
+
+  console.log("Updating the item...");
+  documentClient.update(params, function (err, data) {
+    if (err) {
+      console.error(
+        "Unable to update item. Error JSON:",
+        JSON.stringify(err, null, 2)
+      );
+    } else {
+      console.log("UpdateItem succeeded:", JSON.stringify(data, null, 2));
+    }
+  });
+};

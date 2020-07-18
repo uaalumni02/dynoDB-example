@@ -81,37 +81,24 @@ module.exports.deleteUser = async (event) => {
   };
 };
 
-var AWS = require("aws-sdk");
-
-const documentClient = new AWS.DynamoDB.DocumentClient();
-
-var table = "users";
-
 module.exports.updateUser = async (event) => {
-  let ID = event.pathParameters.id; //getting ID
-  const user = JSON.parse(event.body); //good
-  var params = {
-    TableName: table,
-    Key: {
-      ID,
-    },
-    UpdateExpression: "set email = :e, firstName=:f",
-    ExpressionAttributeValues: {
-      ":e": user.email,
-      ":f": user.firstName,
-    },
-    ReturnValues: "ALL_NEW",
-  };
-  console.log("Updating the item...");
-  const res = await documentClient.update(params).promise();
-  if (!res) {
-    throw Error("Error updating item");
-  } else {
+  let ID = event.pathParameters.id;
+  const user = JSON.parse(event.body);
+  user.ID = ID;
+  const updatedUser = await Dynamo.update(user, tableName).catch((err) => {
+    console.log("error in dynamo update", err);
+    return null;
+  });
+  if (!updatedUser) {
     return {
-      statusCode: 200,
-      body: JSON.stringify({
-        res,
-      }),
+      statusCode: 400,
+      body: JSON.stringify({ error: "Failed to update user by ID" }),
     };
   }
+  return {
+    statusCode: 200,
+    body: JSON.stringify({
+      updatedUser,
+    }),
+  };
 };
